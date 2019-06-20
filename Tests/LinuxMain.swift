@@ -1,7 +1,7 @@
 import XCTest
 
-import gimliTests
+import GimliTests
 
 var tests = [XCTestCaseEntry]()
-tests += gimliTests.allTests()
+tests += GimliTests.allTests()
 XCTMain(tests)
