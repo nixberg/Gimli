@@ -1,103 +1,64 @@
-@inline(__always)
-func rotate(_ x: UInt32, by bits: Int) -> UInt32 {
-    return (x << bits) | (x >> (32 &- bits))
-}
-
-struct GimliState {
-    var word0: UInt32 = 0
-    var word1: UInt32 = 0
-    var word2: UInt32 = 0
-    var word3: UInt32 = 0
-    var word4: UInt32 = 0
-    var word5: UInt32 = 0
-    var word6: UInt32 = 0
-    var word7: UInt32 = 0
-    var word8: UInt32 = 0
-    var word9: UInt32 = 0
-    var wordA: UInt32 = 0
-    var wordB: UInt32 = 0
-}
-
-public final class Gimli {
-    private var state: GimliState
-    var words: UnsafeMutableBufferPointer<UInt32>
-
+public struct Gimli {
+    var s: (SIMD4<UInt32>, SIMD4<UInt32>, SIMD4<UInt32>)
+    
     public init() {
-        state = GimliState()
-        words = withUnsafeMutablePointer(to: &state) {
-            $0.withMemoryRebound(to: UInt32.self, capacity: 12, {
-                UnsafeMutableBufferPointer(start: $0, count: 12)
-            })
-        }
-    }
-    
-    public convenience init<S>(from bytes: S) where S.Element == UInt8, S : Sequence {
-        self.init()
-        for (index, byte) in bytes.enumerated() {
-            self[index] = byte
-        }
-    }
-    
-    public convenience init(from other: Gimli) {
-        self.init()
-        for (index, word) in other.words.enumerated() {
-            words[index] = word
-        }
+        s = (.zero, .zero, .zero)
     }
     
     public subscript(index: Int) -> UInt8 {
         get {
-            return withUnsafeBytes(of: &state, {
-                $0[index]
-            })
+            return withUnsafePointer(to: s) {
+                $0.withMemoryRebound(to: UInt8.self, capacity: 48) {
+                    $0[index]
+                }
+            }
         }
-        set(newValue) {
-            withUnsafeMutableBytes(of: &state, {
-                $0[index] = newValue
-            })
+        set {
+            withUnsafeMutablePointer(to: &s) {
+                $0.withMemoryRebound(to: UInt8.self, capacity: 48) {
+                    $0[index] = newValue
+                }
+            }
         }
     }
-
-    public func permute() {
-        for round in (1...24).reversed() {
-            for column in 0..<4 {
-                let x = rotate(words[0 &+ column], by: 24)
-                let y = rotate(words[4 &+ column], by:  9)
-                let z =        words[8 &+ column]
-                
-                words[8 &+ column] = x ^ (z << 1) ^ ((y & z) << 2)
-                words[4 &+ column] = y ^ x        ^ ((x | z) << 1)
-                words[0 &+ column] = z ^ y        ^ ((x & y) << 3)
-            }
+    
+    public var last: UInt8 {
+        get {
+            return self[47]
+        }
+        set {
+            self[47] = newValue
+        }
+    }
+    
+    public mutating func permute() {
+        for round in (UInt32(1)...24).reversed() {
+            let x = s.0.rotated(by: 24)
+            let y = s.1.rotated(by:  9)
+            let z = s.2
             
-            if round & 3 == 0 {
-                var x = words[0]
-                words[0] = words[1]
-                words[1] = x
-                x = words[2]
-                words[2] = words[3]
-                words[3] = x
-                words[0] ^= 0x9e377900 | UInt32(round)
-            } else if round & 3 == 2 {
-                var x = words[0]
-                words[0] = words[2]
-                words[2] = x
-                x = words[1]
-                words[1] = words[3]
-                words[3] = x
+            s.2 = x ^ (z &<< 1) ^ ((y & z) &<< 2)
+            s.1 = y ^  x        ^ ((x | z) &<< 1)
+            s.0 = z ^  y        ^ ((x & y) &<< 3)
+            
+            switch round % 4 {
+            case 0:
+                s.0 = SIMD4<UInt32>(s.0.y, s.0.x, s.0.w, s.0.z)
+                // s.0 = s.0[SIMD4<Int>(1, 0, 3, 2)]
+                s.0 ^= SIMD4<UInt32>(0x9e377900 ^ round, 0, 0, 0)
+            case 2:
+                s.0 = SIMD4<UInt32>(s.0.z, s.0.w, s.0.x, s.0.y)
+                // s.0 = s.0[SIMD4<Int>(2, 3, 0, 1)]
+            default:
+                break
             }
         }
     }
 }
 
-extension Gimli: Equatable {
-    public static func == (lhs: Gimli, rhs: Gimli) -> Bool {
-        return zip(lhs.words, rhs.words).reduce(0, { $0 | ($1.0 ^ $1.1) }) == 0
-    }
-}
-
-extension Gimli: CustomStringConvertible {
-    public var description: String {
-        return "[\(words.map(String.init).joined(separator: ", "))]"
+extension SIMD4 where Scalar == UInt32 {
+    @inline(__always)
+    func rotated(by n: UInt32) -> SIMD4<UInt32> {
+        return (self &<< n) | (self &>> (32 &- n))
     }
 }
