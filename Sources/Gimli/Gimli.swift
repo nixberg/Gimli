@@ -1,5 +1,5 @@
 @inline(__always)
-fileprivate func rotate(_ x: UInt32, by bits: Int) -> UInt32 {
+func rotate(_ x: UInt32, by bits: Int) -> UInt32 {
     return (x << bits) | (x >> (32 &- bits))
 }
 
@@ -20,9 +20,8 @@ struct GimliState {
 
 public final class Gimli {
     private var state: GimliState
-    public var words: UnsafeMutableBufferPointer<UInt32>
-    public var bytes: UnsafeMutableRawBufferPointer
-    
+    var words: UnsafeMutableBufferPointer<UInt32>
+
     public init() {
         state = GimliState()
         words = withUnsafeMutablePointer(to: &state) {
@@ -30,9 +29,31 @@ public final class Gimli {
                 UnsafeMutableBufferPointer(start: $0, count: 12)
             })
         }
-        bytes = withUnsafeMutablePointer(to: &state) {
-            $0.withMemoryRebound(to: UInt8.self, capacity: 4 * 12, {
-                UnsafeMutableRawBufferPointer(start: $0, count: 4 * 12)
+    }
+    
+    public convenience init<S>(from bytes: S) where S.Element == UInt8, S : Sequence {
+        self.init()
+        for (index, byte) in bytes.enumerated() {
+            self[index] = byte
+        }
+    }
+    
+    public convenience init(from other: Gimli) {
+        self.init()
+        for (index, word) in other.words.enumerated() {
+            words[index] = word
+        }
+    }
+    
+    public subscript(index: Int) -> UInt8 {
+        get {
+            return withUnsafeBytes(of: &state, {
+                $0[index]
+            })
+        }
+        set(newValue) {
+            withUnsafeMutableBytes(of: &state, {
+                $0[index] = newValue
             })
         }
     }
@@ -56,7 +77,7 @@ public final class Gimli {
                 x = words[2]
                 words[2] = words[3]
                 words[3] = x
-                words[0] ^= 0x9e377900 | UInt32(round);
+                words[0] ^= 0x9e377900 | UInt32(round)
             } else if round & 3 == 2 {
                 var x = words[0]
                 words[0] = words[2]
@@ -66,5 +87,17 @@ public final class Gimli {
                 words[3] = x
             }
         }
+    }
+}
+
+extension Gimli: Equatable {
+    public static func == (lhs: Gimli, rhs: Gimli) -> Bool {
+        return zip(lhs.words, rhs.words).reduce(0, { $0 | ($1.0 ^ $1.1) }) == 0
+    }
+}
+
+extension Gimli: CustomStringConvertible {
+    public var description: String {
+        return "[\(words.map(String.init).joined(separator: ", "))]"
     }
 }

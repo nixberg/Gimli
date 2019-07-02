@@ -9,7 +9,7 @@ final class gimliTests: XCTestCase {
             let j = UInt32(i)
             gimli.words[i] = j &* j &* j &+ j &* 0x9e3779b9
         }
-        
+                
         gimli.permute()
 
         let expected: [UInt32] = [
