@@ -1,7 +1,7 @@
 import XCTest
 @testable import Gimli
 
-final class gimliTests: XCTestCase {
+final class GimliTests: XCTestCase {
     func testGimli() {
         var gimli = Gimli()
         
