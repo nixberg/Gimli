@@ -24,7 +24,7 @@ public struct Gimli {
     
     public var last: UInt8 {
         get {
-            return self[47]
+            self[47]
         }
         set {
             self[47] = newValue
@@ -43,12 +43,10 @@ public struct Gimli {
             
             switch round % 4 {
             case 0:
-                s.0 = SIMD4<UInt32>(s.0.y, s.0.x, s.0.w, s.0.z)
-                // s.0 = s.0[SIMD4<Int>(1, 0, 3, 2)]
+                s.0 = s.0[SIMD4<Int>(1, 0, 3, 2)]
                 s.0 ^= SIMD4<UInt32>(0x9e377900 ^ round, 0, 0, 0)
             case 2:
-                s.0 = SIMD4<UInt32>(s.0.z, s.0.w, s.0.x, s.0.y)
-                // s.0 = s.0[SIMD4<Int>(2, 3, 0, 1)]
+                s.0 = s.0[SIMD4<Int>(2, 3, 0, 1)]
             default:
                 break
             }
@@ -59,12 +57,12 @@ public struct Gimli {
 extension SIMD4 where Scalar == UInt32 {
     @inline(__always)
     func rotated(by n: UInt32) -> SIMD4<UInt32> {
-        return (self &<< n) | (self &>> (32 &- n))
+        (self &<< n) | (self &>> (32 &- n))
     }
 }
 
 extension Gimli: Equatable {
     public static func == (lhs: Gimli, rhs: Gimli) -> Bool {
-        return lhs.s.0 == rhs.s.0 && lhs.s.1 == rhs.s.1 && lhs.s.2 == rhs.s.2
+        lhs.s.0 == rhs.s.0 && lhs.s.1 == rhs.s.1 && lhs.s.2 == rhs.s.2
     }
 }
