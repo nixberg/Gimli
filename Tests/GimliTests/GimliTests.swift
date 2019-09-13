@@ -16,15 +16,9 @@ final class GimliTests: XCTestCase {
         
         gimli.permute()
         
-        let expected = (
-            SIMD4<UInt32>(0xba11c85a, 0x91bad119, 0x380ce880, 0xd24c2c68),
-            SIMD4<UInt32>(0x3eceffea, 0x277a921c, 0x4f73a0bd, 0xda5a9cd8),
-            SIMD4<UInt32>(0x84b673f0, 0x34e52ff7, 0x9e2bef49, 0xf41bb8d6)
-        )
-        
-        XCTAssertEqual(gimli.s.0, expected.0)
-        XCTAssertEqual(gimli.s.1, expected.1)
-        XCTAssertEqual(gimli.s.2, expected.2)
+        XCTAssertEqual(gimli.s.0, [0xba11c85a, 0x91bad119, 0x380ce880, 0xd24c2c68])
+        XCTAssertEqual(gimli.s.1, [0x3eceffea, 0x277a921c, 0x4f73a0bd, 0xda5a9cd8])
+        XCTAssertEqual(gimli.s.2, [0x84b673f0, 0x34e52ff7, 0x9e2bef49, 0xf41bb8d6])
     }
     
     static var allTests = [

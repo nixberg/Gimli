@@ -9,8 +9,7 @@ let package = Package(
             name: "Gimli",
             targets: ["Gimli"]),
     ],
-    dependencies: [
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "Gimli",
