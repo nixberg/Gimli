@@ -15,20 +15,12 @@ public struct Gimli {
             }
         }
         set {
+            precondition(0 <= index && index < 48)
             withUnsafeMutablePointer(to: &s) {
                 $0.withMemoryRebound(to: UInt8.self, capacity: 48) {
                     $0[index] = newValue
                 }
             }
-        }
-    }
-    
-    public var last: UInt8 {
-        get {
-            self[47]
-        }
-        set {
-            self[47] = newValue
         }
     }
     
