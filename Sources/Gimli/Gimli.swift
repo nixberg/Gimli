@@ -67,9 +67,3 @@ extension SIMD4 where Scalar == UInt32 {
         (self &<< n) | (self &>> (32 &- n))
     }
 }
-
-extension Gimli: Equatable {
-    public static func == (lhs: Gimli, rhs: Gimli) -> Bool {
-        lhs.s.0 == rhs.s.0 && lhs.s.1 == rhs.s.1 && lhs.s.2 == rhs.s.2
-    }
-}
