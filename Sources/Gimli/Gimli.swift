@@ -25,18 +25,25 @@ public struct Gimli {
     }
     
     public mutating func permute() {
-        [0x9e377918 as UInt32, 0x9e377914, 0x9e377910, 0x9e37790c, 0x9e377908, 0x9e377904].forEach {
-            self.applySPBox()
-            self.smallSwap()
-            s.0.x ^= $0
-            
-            self.applySPBox()
-            
-            self.applySPBox()
-            self.bigSwap()
-            
-            self.applySPBox()
-        }
+        self.quadrupleRound(0x9e377918)
+        self.quadrupleRound(0x9e377914)
+        self.quadrupleRound(0x9e377910)
+        self.quadrupleRound(0x9e37790c)
+        self.quadrupleRound(0x9e377908)
+        self.quadrupleRound(0x9e377904)
+    }
+    
+    private mutating func quadrupleRound(_ constant: UInt32) {
+        self.applySPBox()
+        self.smallSwap()
+        s.0.x ^= constant
+        
+        self.applySPBox()
+        
+        self.applySPBox()
+        self.bigSwap()
+        
+        self.applySPBox()
     }
     
     @inline(__always)
@@ -61,7 +68,7 @@ public struct Gimli {
     }
 }
 
-extension SIMD4 where Scalar == UInt32 {
+fileprivate extension SIMD4 where Scalar == UInt32 {
     @inline(__always)
     func rotated(by n: UInt32) -> Self {
         (self &<< n) | (self &>> (32 &- n))
