@@ -20,8 +20,4 @@ final class GimliTests: XCTestCase {
         XCTAssertEqual(gimli.s.1, [0x3eceffea, 0x277a921c, 0x4f73a0bd, 0xda5a9cd8])
         XCTAssertEqual(gimli.s.2, [0x84b673f0, 0x34e52ff7, 0x9e2bef49, 0xf41bb8d6])
     }
-    
-    static var allTests = [
-        ("testGimli", testGimli),
-    ]
 }
