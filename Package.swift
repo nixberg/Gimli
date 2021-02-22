@@ -3,17 +3,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "Gimli",
+    name: "gimli-swift",
     products: [
         .library(
             name: "Gimli",
             targets: ["Gimli"]),
     ],
-    dependencies: [],
     targets: [
         .target(
-            name: "Gimli",
-            dependencies: []),
+            name: "Gimli"),
         .testTarget(
             name: "GimliTests",
             dependencies: ["Gimli"]),
