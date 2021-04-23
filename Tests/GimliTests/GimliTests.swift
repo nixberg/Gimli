@@ -1,5 +1,5 @@
-import XCTest
 import Gimli
+import XCTest
 
 final class GimliTests: XCTestCase {
     func testGimli() {
@@ -18,8 +18,6 @@ final class GimliTests: XCTestCase {
             0xb8, 0xdb, 0x63, 0x01, 0xe9, 0x0a, 0x73, 0x0c,
         ]
         
-        for (i, byte) in expected.enumerated() {
-            XCTAssertEqual(gimli[i], byte)
-        }
+        XCTAssert(gimli.elementsEqual(expected))
     }
 }
