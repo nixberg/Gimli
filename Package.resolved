@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "endianbytes-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nixberg/endianbytes-swift",
+      "state" : {
+        "revision" : "6dc212dd64adcc0e760ace4f774182cd1a89bb96",
+        "version" : "0.5.0"
+      }
+    }
+  ],
+  "version" : 2
+}
