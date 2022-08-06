@@ -1,4 +1,4 @@
-// swift-tools-version:5.4
+// swift-tools-version:5.6
 
 import PackageDescription
 
@@ -10,15 +10,13 @@ let package = Package(
             targets: ["Gimli"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-algorithms", from: "1.0.0"),
-        .package(url: "https://github.com/nixberg/endianbytes-swift", from: "0.2.0"),
+        .package(url: "https://github.com/nixberg/endianbytes-swift", .upToNextMinor(from: "0.5.0")),
     ],
     targets: [
         .target(
             name: "Gimli",
             dependencies: [
-                .product(name: "Algorithms", package: "swift-algorithms"),
-                .product(name: "EndianBytes", package: "endianbytes-swift"),
+                .product(name: "SIMDEndianBytes", package: "endianbytes-swift"),
             ]),
         .testTarget(
             name: "GimliTests",

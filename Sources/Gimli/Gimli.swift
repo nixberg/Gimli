@@ -1,27 +1,10 @@
-import Algorithms
-import EndianBytes
+import SIMDEndianBytes
 
 public struct Gimli {
     private var state: [UInt8]
     
     public init() {
         state = .init(repeating: 0, count: 48)
-    }
-    
-    @inline(__always)
-    private func unpack() -> (SIMD4<UInt32>, SIMD4<UInt32>, SIMD4<UInt32>) {
-        let a: SIMD4<UInt32> = .init(littleEndianBytes: state[00..<16])!
-        let b: SIMD4<UInt32> = .init(littleEndianBytes: state[16..<32])!
-        let c: SIMD4<UInt32> = .init(littleEndianBytes: state[32..<48])!
-        return (a, b, c)
-    }
-    
-    @inline(__always)
-    private mutating func pack(_ a: SIMD4<UInt32>, _ b: SIMD4<UInt32>, _ c: SIMD4<UInt32>) {
-        state.removeAll(keepingCapacity: true)
-        state.append(contentsOf: a.littleEndianBytes)
-        state.append(contentsOf: b.littleEndianBytes)
-        state.append(contentsOf: c.littleEndianBytes)
     }
     
     public mutating func permute() {
@@ -56,6 +39,22 @@ public struct Gimli {
         }
         
         self.pack(a, b, c)
+    }
+    
+    @inline(__always)
+    private func unpack() -> (SIMD4<UInt32>, SIMD4<UInt32>, SIMD4<UInt32>) {
+        let a: SIMD4<UInt32> = .init(littleEndianBytes: state[00..<16])
+        let b: SIMD4<UInt32> = .init(littleEndianBytes: state[16..<32])
+        let c: SIMD4<UInt32> = .init(littleEndianBytes: state[32..<48])
+        return (a, b, c)
+    }
+    
+    @inline(__always)
+    private mutating func pack(_ a: SIMD4<UInt32>, _ b: SIMD4<UInt32>, _ c: SIMD4<UInt32>) {
+        state.removeAll(keepingCapacity: true)
+        state.append(contentsOf: a.littleEndianBytes())
+        state.append(contentsOf: b.littleEndianBytes())
+        state.append(contentsOf: c.littleEndianBytes())
     }
 }
 
