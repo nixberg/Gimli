@@ -75,10 +75,17 @@ fileprivate extension SIMD4 where Scalar == UInt32 {
     }
 }
 
-extension Gimli: RandomAccessCollection {
+extension Gimli: MutableCollection & RandomAccessCollection {
     public typealias Element = UInt8
     
-    public typealias Index = Array<UInt8>.Index
+    public typealias Index = Int
+    
+    public typealias SubSequence = ArraySlice<UInt8>
+    
+    @inline(__always)
+    public var count: Int {
+        48
+    }
     
     @inline(__always)
     public var startIndex: Self.Index {
@@ -91,22 +98,22 @@ extension Gimli: RandomAccessCollection {
     }
     
     @inline(__always)
-    public func index(after i: Self.Index) -> Self.Index {
-        state.index(after: i)
-    }
-    
-    @inline(__always)
-    public func index(before i: Self.Index) -> Self.Index {
-        state.index(before: i)
-    }
-    
-    @inline(__always)
-    public subscript(index: Self.Index) -> Self.Element {
+    public subscript(position: Self.Index) -> Self.Element {
         get {
-            state[index]
+            state[position]
         }
-        set {
-            state[index] = newValue
+        _modify {
+            yield &state[position]
+        }
+    }
+    
+    @inline(__always)
+    public subscript(bounds: Range<Self.Index>) -> Self.SubSequence {
+        get {
+            state[bounds]
+        }
+        _modify {
+            yield &state[bounds]
         }
     }
     
@@ -115,8 +122,8 @@ extension Gimli: RandomAccessCollection {
         get {
             state[startIndex]
         }
-        set {
-            state[startIndex] = newValue
+        _modify {
+            yield &state[startIndex]
         }
     }
     
@@ -125,8 +132,22 @@ extension Gimli: RandomAccessCollection {
         get {
             state[endIndex - 1]
         }
-        set {
-            state[endIndex - 1] = newValue
+        _modify {
+            yield &state[endIndex - 1]
         }
+    }
+    
+    @inline(__always)
+    public func withContiguousStorageIfAvailable<R>(
+        _ body: (UnsafeBufferPointer<Self.Element>) throws -> R
+    ) rethrows -> R? {
+        try state.withContiguousStorageIfAvailable(body)
+    }
+    
+    @inline(__always)
+    public mutating func withContiguousMutableStorageIfAvailable<R>(
+        _ body: (inout UnsafeMutableBufferPointer<Self.Element>) throws -> R
+    ) rethrows -> R? {
+        try state.withContiguousMutableStorageIfAvailable(body)
     }
 }
