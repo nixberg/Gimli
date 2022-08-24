@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.7
 
 import PackageDescription
 
@@ -9,15 +9,9 @@ let package = Package(
             name: "Gimli",
             targets: ["Gimli"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/nixberg/endianbytes-swift", "0.5.0"..<"0.6.0"),
-    ],
     targets: [
         .target(
-            name: "Gimli",
-            dependencies: [
-                .product(name: "SIMDEndianBytes", package: "endianbytes-swift"),
-            ]),
+            name: "Gimli"),
         .testTarget(
             name: "GimliTests",
             dependencies: ["Gimli"]),
