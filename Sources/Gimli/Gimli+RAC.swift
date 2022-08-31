@@ -16,11 +16,13 @@ extension Gimli: MutableCollection & RandomAccessCollection {
     @inline(__always)
     public subscript(position: Index) -> Element {
         get {
-            self.withContiguousStorage {
+            precondition(indices.contains(position))
+            return self.withContiguousStorage {
                 $0[position]
             }
         }
         set {
+            precondition(indices.contains(position))
             self.withContiguousMutableStorage {
                 $0[position] = newValue
             }
