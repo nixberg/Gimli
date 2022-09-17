@@ -1,5 +1,5 @@
-[![Swift](https://github.com/nixberg/gimli-swift/actions/workflows/swift.yml/badge.svg)](
-https://github.com/nixberg/gimli-swift/actions/workflows/swift.yml)
+[![Swift](https://github.com/nixberg/gimli-swift/actions/workflows/swift.yaml/badge.svg)](
+https://github.com/nixberg/gimli-swift/actions/workflows/swift.yaml)
 
 # gimli-swift
 
