@@ -30,7 +30,7 @@ extension Gimli: MutableCollection & RandomAccessCollection {
     }
     
     @inline(__always)
-    public var first: Self.Element {
+    public var first: Element {
         get {
             self[startIndex]
         }
@@ -40,7 +40,7 @@ extension Gimli: MutableCollection & RandomAccessCollection {
     }
     
     @inline(__always)
-    public var last: Self.Element {
+    public var last: Element {
         get {
             self[endIndex - 1]
         }
