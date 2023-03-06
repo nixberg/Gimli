@@ -17,13 +17,13 @@ extension Gimli: MutableCollection & RandomAccessCollection {
     public subscript(position: Index) -> Element {
         get {
             precondition(indices.contains(position))
-            return self.withContiguousStorage {
+            return self.withUnsafeBufferPointer {
                 $0[position]
             }
         }
         set {
             precondition(indices.contains(position))
-            self.withContiguousMutableStorage {
+            self.withUnsafeMutableBufferPointer {
                 $0[position] = newValue
             }
         }
@@ -53,20 +53,29 @@ extension Gimli: MutableCollection & RandomAccessCollection {
     public func withContiguousStorageIfAvailable<R>(
         _ body: (UnsafeBufferPointer<Element>) throws -> R
     ) rethrows -> R? {
-        try self.withContiguousStorage(body)
+        try self.withUnsafeBufferPointer(body)
     }
     
     @inline(__always)
     public mutating func withContiguousMutableStorageIfAvailable<R>(
         _ body: (inout UnsafeMutableBufferPointer<Element>) throws -> R
     ) rethrows -> R? {
-        try self.withContiguousMutableStorage(body)
+        try self.withUnsafeMutableBufferPointer { bufferPointer in
+            var inoutBufferPointer = bufferPointer
+            defer {
+                precondition(
+                    inoutBufferPointer == bufferPointer,
+                    "\(Self.self) \(#function): replacing the buffer is not allowed"
+                )
+            }
+            return try body(&inoutBufferPointer)
+        }
     }
 }
 
 extension Gimli {
     @inline(__always)
-    public func withContiguousStorage<R>(
+    public func withUnsafeBufferPointer<R>(
         _ body: (UnsafeBufferPointer<Element>) throws -> R
     ) rethrows -> R {
         try withUnsafePointer(to: self) {
@@ -77,15 +86,35 @@ extension Gimli {
     }
     
     @inline(__always)
-    public mutating func withContiguousMutableStorage<R>(
-        _ body: (inout UnsafeMutableBufferPointer<Element>) throws -> R
+    public mutating func withUnsafeMutableBufferPointer<R>(
+        _ body: (UnsafeMutableBufferPointer<Element>) throws -> R
     ) rethrows -> R {
         let count = count
         return try withUnsafeMutablePointer(to: &self) {
             try $0.withMemoryRebound(to: Element.self, capacity: count) {
-                var buffer = UnsafeMutableBufferPointer(start: $0, count: count)
-                return try body(&buffer)
+                try body(UnsafeMutableBufferPointer(start: $0, count: count))
             }
         }
+    }
+    
+    @inline(__always)
+    public func withUnsafeBytes<R>(
+        _ body: (UnsafeRawBufferPointer) throws -> R
+    ) rethrows -> R {
+        try Swift.withUnsafeBytes(of: self, body)
+    }
+    
+    @inline(__always)
+    public mutating func withUnsafeMutableBytes<R>(
+        _ body: (UnsafeMutableRawBufferPointer) throws -> R
+    ) rethrows -> R {
+        try Swift.withUnsafeMutableBytes(of: &self, body)
+    }
+}
+
+private extension UnsafeMutableBufferPointer {
+    @inline(__always)
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.baseAddress == rhs.baseAddress && lhs.count == rhs.count
     }
 }

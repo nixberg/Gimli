@@ -2,7 +2,7 @@ import Gimli
 import XCTest
 
 final class GimliTests: XCTestCase {
-    func testGimli() {
+    func testPermutation() {
         XCTAssert(Gimli().permutations().dropFirst(383).joined().starts(with: [
             0xf7, 0xb2, 0xd5, 0x86, 0x5e, 0x79, 0x28, 0x27,
             0xcb, 0xad, 0xe4, 0x14, 0x07, 0x5f, 0x6e, 0x3e,
@@ -12,9 +12,44 @@ final class GimliTests: XCTestCase {
             0xb8, 0xdb, 0x63, 0x01, 0xe9, 0x0a, 0x73, 0x0c,
         ]))
     }
+    
+    func testMRAC() {
+        var state = Gimli()
+        
+        XCTAssertEqual(state.count, 48)
+        XCTAssertEqual(state.indices, 0..<48)
+        
+        XCTAssertEqual(state.index(after: state.startIndex), 1)
+        XCTAssertEqual(state.index(before: state.endIndex), 47)
+        
+        state[43] = 0xff
+        XCTAssertEqual(state[43], 0xff)
+        state.first = 0xff
+        XCTAssertEqual(state.first, 0xff)
+        state.last = 0xff
+        XCTAssertEqual(state.last, 0xff)
+        
+        state.withContiguousMutableStorageIfAvailable {
+            for (index, element): (_, UInt8) in zip($0.indices, 0...) {
+                $0[index] = element
+            }
+        }
+        state.withContiguousStorageIfAvailable {
+            XCTAssert($0.elementsEqual(0..<48))
+        }
+        
+        state.withUnsafeMutableBytes {
+            $0.copyBytes(from: 1...48)
+        }
+        state.withUnsafeBytes {
+            XCTAssert($0.elementsEqual(1...48))
+        }
+        
+        XCTAssert(state.elementsEqual(1...48))
+    }
 }
 
-fileprivate extension Gimli {
+private extension Gimli {
     func permutations() -> some Sequence<Self> {
         sequence(state: self, next: {
             $0.permute()

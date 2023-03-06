@@ -13,7 +13,7 @@ public struct Gimli {
         for roundConstant: UInt32 in stride(from: 0x9e37_7918, to: 0x9e37_7900, by: -4) {
             self.applySPBox()
             a = a[1, 0, 3, 2]
-            a.x ^= roundConstant
+            a[0] ^= roundConstant
             
             self.applySPBox()
             
