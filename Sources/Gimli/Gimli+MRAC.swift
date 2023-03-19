@@ -10,7 +10,7 @@ extension Gimli: MutableCollection & RandomAccessCollection {
     
     @inline(__always)
     public var endIndex: Index {
-        48
+        MemoryLayout<Self>.size
     }
     
     @inline(__always)
@@ -42,10 +42,10 @@ extension Gimli: MutableCollection & RandomAccessCollection {
     @inline(__always)
     public var last: Element {
         get {
-            self[endIndex - 1]
+            self[self.index(before: endIndex)]
         }
         set {
-            self[endIndex - 1] = newValue
+            self[self.index(before: endIndex)] = newValue
         }
     }
     
@@ -78,10 +78,8 @@ extension Gimli {
     public func withUnsafeBufferPointer<R>(
         _ body: (UnsafeBufferPointer<Element>) throws -> R
     ) rethrows -> R {
-        try withUnsafePointer(to: self) {
-            try $0.withMemoryRebound(to: Element.self, capacity: count) {
-                try body(UnsafeBufferPointer(start: $0, count: count))
-            }
+        try self.withUnsafeBytes {
+            try $0.withMemoryRebound(to: UInt8.self, body)
         }
     }
     
@@ -89,11 +87,8 @@ extension Gimli {
     public mutating func withUnsafeMutableBufferPointer<R>(
         _ body: (UnsafeMutableBufferPointer<Element>) throws -> R
     ) rethrows -> R {
-        let count = count
-        return try withUnsafeMutablePointer(to: &self) {
-            try $0.withMemoryRebound(to: Element.self, capacity: count) {
-                try body(UnsafeMutableBufferPointer(start: $0, count: count))
-            }
+        try self.withUnsafeMutableBytes {
+            try $0.withMemoryRebound(to: UInt8.self, body)
         }
     }
     
