@@ -1,4 +1,4 @@
-extension Gimli: MutableCollection & RandomAccessCollection {
+extension State: MutableCollection & RandomAccessCollection {
     public typealias Element = UInt8
     
     public typealias Index = Int
@@ -73,7 +73,7 @@ extension Gimli: MutableCollection & RandomAccessCollection {
     }
 }
 
-extension Gimli {
+extension State {
     @inline(__always)
     public func withUnsafeBufferPointer<R>(
         _ body: (UnsafeBufferPointer<Element>) throws -> R
@@ -107,9 +107,9 @@ extension Gimli {
     }
 }
 
-private extension UnsafeMutableBufferPointer {
+extension UnsafeMutableBufferPointer {
     @inline(__always)
-    static func == (lhs: Self, rhs: Self) -> Bool {
+    fileprivate static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.baseAddress == rhs.baseAddress && lhs.count == rhs.count
     }
 }

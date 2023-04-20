@@ -3,7 +3,7 @@ import XCTest
 
 final class GimliTests: XCTestCase {
     func testPermutation() {
-        XCTAssert(Gimli().permutations().dropFirst(383).joined().starts(with: [
+        XCTAssert(State().permutations().dropFirst(383).joined().starts(with: [
             0xf7, 0xb2, 0xd5, 0x86, 0x5e, 0x79, 0x28, 0x27,
             0xcb, 0xad, 0xe4, 0x14, 0x07, 0x5f, 0x6e, 0x3e,
             0x40, 0x8a, 0xcc, 0x2f, 0xdb, 0xb7, 0xbb, 0x56,
@@ -14,7 +14,7 @@ final class GimliTests: XCTestCase {
     }
     
     func testMRAC() {
-        var state = Gimli()
+        var state = State()
         
         XCTAssertEqual(state.count, 48)
         XCTAssertEqual(state.indices, 0..<48)
@@ -49,8 +49,8 @@ final class GimliTests: XCTestCase {
     }
 }
 
-private extension Gimli {
-    func permutations() -> some Sequence<Self> {
+extension State {
+    fileprivate func permutations() -> some Sequence<Self> {
         sequence(state: self, next: {
             $0.permute()
             return $0
