@@ -16,13 +16,13 @@ extension State: MutableCollection & RandomAccessCollection {
     @inline(__always)
     public subscript(position: Index) -> Element {
         get {
-            precondition(indices.contains(position))
+            precondition(indices.contains(position), "Index out of range")
             return self.withUnsafeBufferPointer {
                 $0[position]
             }
         }
         set {
-            precondition(indices.contains(position))
+            precondition(indices.contains(position), "Index out of range")
             self.withUnsafeMutableBufferPointer {
                 $0[position] = newValue
             }
